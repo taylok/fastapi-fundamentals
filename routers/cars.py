@@ -3,7 +3,8 @@ from sqlmodel import Session, select
 from starlette import status
 
 from db import get_session
-from schemas import Car, CarOutput, CarInput, TripInput, Trip
+from routers.auth import get_current_user
+from schemas import Car, CarOutput, CarInput, TripInput, Trip, User
 
 # Use APIRouter, part of app, and register api operations with the Router
 # So we don't need to import app from carsharing anymore
@@ -50,10 +51,13 @@ def get_car_by_id(id: int, session: Session = Depends(get_session)) -> Car:
 
 
 # @router.post("/api/cars/", response_model=Car)
+# fastapi operation asks for a logged-in user because of dependency
 @router.post("/", response_model=Car, status_code=200)
-def add_car(*, car_input: CarInput, session: Session = Depends(get_session), response: Response) -> Car:
+def add_car(*, car_input: CarInput, session: Session = Depends(get_session), user: User = Depends(get_current_user),
+            response: Response) -> Car:
     """
     Add car
+    :param user:
     :param response:
     :param session:
     :param car_input: CarInput
