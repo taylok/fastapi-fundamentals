@@ -1,5 +1,5 @@
 from passlib.context import CryptContext
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field, Relationship, Column, VARCHAR
 
 # SQLModel is pydantic
 # https://sqlmodel.tiangolo.com
@@ -14,9 +14,10 @@ class UserOutput(SQLModel):
     username: str
 
 
+# Add Unique and Index to the username field, via SQLModel and SQLAlchemy, sa_ stands for sqlalchemy
 class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    username: str
+    username: str = Field(sa_column=Column("username", VARCHAR, unique=True, index=True))
     password_hash: str
 
     def set_password(self, password):
