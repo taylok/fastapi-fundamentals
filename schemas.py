@@ -1,10 +1,14 @@
+from passlib.context import CryptContext
 from sqlmodel import SQLModel, Field, Relationship
-
 
 # SQLModel is pydantic
 # https://sqlmodel.tiangolo.com
 
-# Adding Authentication
+# python -m pip install "passlib[bcrypt]"
+pwd_context = CryptContext(schemas=["bcrypt"])
+
+
+# Adding Authentication: output schema prevents leaking of password hashes
 class UserOutput(SQLModel):
     id: int
     username: str
@@ -14,6 +18,14 @@ class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     username: str
     password_hash: str | ""
+
+    def set_password(self, password):
+        """ Setting the passwords actually sets password_hash """
+        self.password_hash = pwd_context.hash(password)
+
+    def verify_password(self, password):
+        """ Verify given password by hashing and comparing to password_hash """
+        return pwd_context.verify(password, self.password_hash)
 
 
 # Allows Car models to hold a list
@@ -66,5 +78,3 @@ class Car(CarInput, table=True):
 class CarOutput(CarInput):
     id: int
     trips: list[TripOutput] = []
-
-
