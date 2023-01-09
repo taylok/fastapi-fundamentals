@@ -5,7 +5,7 @@ from sqlmodel import SQLModel, Field, Relationship
 # https://sqlmodel.tiangolo.com
 
 # python -m pip install "passlib[bcrypt]"
-pwd_context = CryptContext(schemas=["bcrypt"])
+pwd_context = CryptContext(schemes=["bcrypt"])
 
 
 # Adding Authentication: output schema prevents leaking of password hashes
@@ -17,7 +17,7 @@ class UserOutput(SQLModel):
 class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     username: str
-    password_hash: str | ""
+    password_hash: str
 
     def set_password(self, password):
         """ Setting the passwords actually sets password_hash """
