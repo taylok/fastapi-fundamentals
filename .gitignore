@@ -4,4 +4,6 @@
 # Allow
 !*.py
 !*.json
+!*.html
 !routers/
+!templates/

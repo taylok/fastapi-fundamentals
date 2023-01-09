@@ -1,22 +1,12 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from starlette.responses import HTMLResponse
+from starlette.templating import Jinja2Templates
 
 router = APIRouter()
 
+templates = Jinja2Templates(directory="templates")
+
 
 @router.get("/", response_class=HTMLResponse)
-def home():
-    return """
-    <html>
-        <head>
-            <title>Carsharing Demo</title>
-        </head>
-        <body>
-            <h1>Welcome to the Car Sharing service</h1>
-            <p>Here is some text for you</p>
-        </body>
-
-    </html>
-    """
-
-
+def home(request: Request):
+    return templates.TemplateResponse("home.html", {"request": request})
