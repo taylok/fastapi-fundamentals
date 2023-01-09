@@ -3,10 +3,11 @@ from fastapi import FastAPI
 from sqlmodel import SQLModel
 
 from db import engine
-from routers import cars
+from routers import cars, web
 
 app = FastAPI()
 app.include_router(cars.router)
+app.include_router(web.router)
 
 
 @app.on_event("startup")
