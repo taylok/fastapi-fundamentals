@@ -1,5 +1,6 @@
-from fastapi import Depends, HTTPException, APIRouter
+from fastapi import Depends, HTTPException, APIRouter, Response
 from sqlmodel import Session, select
+from starlette import status
 
 from db import get_session
 from schemas import Car, CarOutput, CarInput, TripInput, Trip
@@ -49,10 +50,11 @@ def get_car_by_id(id: int, session: Session = Depends(get_session)) -> Car:
 
 
 # @router.post("/api/cars/", response_model=Car)
-@router.post("/", response_model=Car)
-def add_car(car_input: CarInput, session: Session = Depends(get_session)) -> Car:
+@router.post("/", response_model=Car, status_code=200)
+def add_car(*, car_input: CarInput, session: Session = Depends(get_session), response: Response) -> Car:
     """
     Add car
+    :param response:
     :param session:
     :param car_input: CarInput
     :return: Car
@@ -61,6 +63,8 @@ def add_car(car_input: CarInput, session: Session = Depends(get_session)) -> Car
     session.add(new_car)
     session.commit()
     session.refresh(new_car)
+    # Artificially override default status for demo
+    response.status_code = status.HTTP_201_CREATED
     return new_car
 
 
@@ -117,9 +121,15 @@ def add_trip(car_id: int, trip_input: TripInput, session: Session = Depends(get_
     car = session.get(Car, car_id)
     if car:
         new_trip = Trip.from_orm(trip_input, update={'car_id': car_id})
+        if new_trip.end < new_trip.start:
+            raise BadTripException("Trip end before start")
         car.trips.append(new_trip)
         session.commit()
         session.refresh(new_trip)
         return new_trip
     else:
         raise HTTPException(status_code=404, detail=f"No car with id={id}.")
+
+
+class BadTripException(Exception):
+    pass
