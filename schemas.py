@@ -4,6 +4,18 @@ from sqlmodel import SQLModel, Field, Relationship
 # SQLModel is pydantic
 # https://sqlmodel.tiangolo.com
 
+# Adding Authentication
+class UserOutput(SQLModel):
+    id: int
+    username: str
+
+
+class User(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    username: str
+    password_hash: str | ""
+
+
 # Allows Car models to hold a list
 # We can have one pydantic class which holds a collection of another
 class TripInput(SQLModel):
@@ -54,3 +66,5 @@ class Car(CarInput, table=True):
 class CarOutput(CarInput):
     id: int
     trips: list[TripOutput] = []
+
+
