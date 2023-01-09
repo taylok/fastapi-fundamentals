@@ -37,3 +37,5 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Sessi
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
 
+# https://bit.ly/fastapi-oauth (includes JWT)
+# https://bit.ly/fastapi-oauth-scopes
