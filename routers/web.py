@@ -11,6 +11,7 @@ router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
 
+# Cookies is very similar for Headers if you wish to access them
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request, cars_cookie: str | None = Cookie(None)):
     # Has the agent visited page before?
