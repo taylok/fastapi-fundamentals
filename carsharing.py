@@ -26,5 +26,14 @@ async def unicorn_exception_handler(request: Request, exc: BadTripException):
         content={"message": "Bad Trip"},
     )
 
+
+# Example of Middleware, set cookie whenever a request comes in
+@app.middleware("http")
+async def add_cars_next(request: Request, call_next):
+    response = await call_next(request)
+    response.set_cookie(key="cars_cookie", value="you_visited_the_carsharing_app")
+    return response
+
+
 if __name__ == "__main__":
     uvicorn.run("carsharing:app", reload=True)
