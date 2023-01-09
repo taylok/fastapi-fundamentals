@@ -1,23 +1,18 @@
-from datetime import datetime
-
+import uvicorn
 from fastapi import FastAPI
+from sqlmodel import SQLModel
+
+from db import engine
+from routers import cars
 
 app = FastAPI()
+app.include_router(cars.router)
 
 
-@app.get("/")
-def welcome():
-    """ Return a friendly welcome message """
-    return {'message': "Welcome to the Car Sharing Service!"}
+@app.on_event("startup")
+def on_startup():
+    SQLModel.metadata.create_all(engine)
 
 
-@app.get("/name")
-def welcome(name):
-    """ Return a friendly welcome message """
-    return {'message': f"Welcome, {name} ,to the Car Sharing Service!"}
-
-
-@app.get("/date")
-def date():
-    """ Return current date/time """
-    return {'date': datetime.now()}
+if __name__ == "__main__":
+    uvicorn.run("carsharing:app", reload=True)

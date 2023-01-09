@@ -1,30 +1,56 @@
-import json
+from sqlmodel import SQLModel, Field, Relationship
 
-from pydantic import BaseModel
+
+# SQLModel is pydantic
+# https://sqlmodel.tiangolo.com
+
+# Allows Car models to hold a list
+# We can have one pydantic class which holds a collection of another
+class TripInput(SQLModel):
+    start: int
+    end: int
+    description: str
+
+
+class TripOutput(TripInput):
+    id: int
+
+
+# Trip Entity, referenced by Car
+# Relations are lazily loaded with SQLModel by default, when retrieving cars
+class Trip(TripInput, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    car_id: int = Field(foreign_key="car.id")
+    # Type hint is in string literals because the Car type is below our Trip class in our file
+    car: "Car" = Relationship(back_populates="trips")
 
 
 # BaseModel inherits __init__, __str__
 # Common to have Input and Output models
-class CarInput(BaseModel):
+class CarInput(SQLModel):
     size: str
     fuel: str | None = "electric"
     doors: int
     transmission: str | None = "auto"
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "size": "m",
+                "doors": 5,
+                "transmission": "manual",
+                "fuel": "hybrid"
+            }
+        }
 
+
+# Car Entity
+class Car(CarInput, table=True):
+    id: int | None = Field(primary_key=True, default=None)
+    trips: list[Trip] = Relationship(back_populates="car")
+
+
+# CarOutput holds a list of trips: in the SQLModel setup is a Schema
 class CarOutput(CarInput):
     id: int
-
-
-# The return statement loads objects from a json file which is a list of dicts,
-# then we loop over that list and pass each obj to pydantic method Car.parse_obj
-def load_db() -> list[CarOutput]:
-    """ Load a list of Car objects from a JSON file """
-    with open("cars.json") as f:
-        return [CarOutput.parse_obj(obj) for obj in json.load(f)]
-
-
-# Open cars.json in write mode, convert each car into a dict
-def save_db(cars: list[CarOutput]):
-    with open("cars.json", "w") as f:
-        json.dump([car.dict() for car in cars], f, indent=4)
+    trips: list[TripOutput] = []
